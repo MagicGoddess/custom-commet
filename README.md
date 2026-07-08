@@ -9,6 +9,11 @@
     <a href="https://bsky.app/profile/commet.chat"><img alt="Bluesky" src="https://img.shields.io/badge/follow-@commet.chat-whitesmoke?style=for-the-badge&logo=bluesky&logoColor=white&color=534cdd"></a>
 </p>
 
+## Changes in this fork
+
+- Added a reusable Docker workflow for building the Flutter web app without installing Flutter, Rust, or native build libraries on the host. Run `./scripts/docker-build-web.sh` from the repository root; artifacts are written to `build/docker-web`.
+- The Docker web build also runs the required codegen, vodozemac wasm prep, and LiveKit worker compilation inside the container. See [Docker Web Build](#docker-web-build) for usage and overrides.
+
 ### Your space to connect
 We are building a client for [Matrix](https://matrix.org) focused on providing a feature rich experience while maintaining a simple interface. The goal is to build a secure, privacy respecting app without compromising on the features you have come to expect from a modern chat client.
 
@@ -113,4 +118,25 @@ When building, there are some additional command line arguments that must be use
 ```bash
 cd commet
 flutter run --dart-define BUILD_MODE=debug --dart-define PLATFORM=linux
+```
+
+## Docker Web Build
+
+To build the Flutter web app without installing Flutter, Rust, or native build libraries on the host, use the Docker workflow from the repository root:
+
+```bash
+./scripts/docker-build-web.sh
+```
+
+The built web app is exported to `build/docker-web`. The script accepts environment overrides, including `FLUTTER_VERSION`, `RUST_VERSION`, and output/build metadata:
+
+```bash
+OUT_DIR=dist/web VERSION_TAG=v0.4.2 BUILD_DETAIL=local-docker ./scripts/docker-build-web.sh
+```
+
+The Dockerfile also has an `nginx` serving target if you want a runnable image:
+
+```bash
+docker build -f docker/web.Dockerfile --target serve -t commet-web .
+docker run --rm -p 8080:80 commet-web
 ```
